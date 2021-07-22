@@ -76,6 +76,8 @@ class Node:
         self.links = []
         self.is_end_node = is_end_node
         self.p = p
+    def __repr__(self):
+        return "<num_neighbor:" + repr(len(self.neighbor)) + ",is_end_node:" + repr(self.is_end_node) + ">"
     def connect_to(self, neighbor, link) -> None:
         if neighbor in self.neighbor:
             return
@@ -125,15 +127,24 @@ class BellPairProcessor:
         self.fidelity_repetition_log.append(self.fidelity)
         self.blocking_time_repetition_log.append(self.blocking_times)
 
-        success_rate = calc_success_rate_of_purification(self.fidelity, self.fidelity)
+        self.blocking_times = self.calc_new_blocking_time_by_purification()
         self.fidelity = calc_new_fidelity_by_purification(self.fidelity, self.fidelity) * (((1-self.nodes[0].p) * (1-self.nodes[1].p))**(self.distance+1))
-        self.blocking_times = BlockingTimes(self.blocking_times.blocking_time_intermediate_node*2/success_rate,
-                                             self.blocking_times.blocking_time_end_node*2/success_rate)
         print(self.fidelity, self.blocking_times)
     def calc_new_fidelity_by_purification(self) -> float:
         return calc_new_fidelity_by_purification(self.fidelity, self.fidelity)
-    def calc_new_blocking_time_by_purification(self) -> int:
-        return (self.blocking_time * 2 + self.distance) / self.calc_success_rate_of_purification()
+    def calc_new_blocking_time_by_purification(self):
+        # have to be called before fidelity gets updated
+        success_rate = calc_success_rate_of_purification(self.fidelity, self.fidelity)
+        new_bt_int_node_ = self.blocking_times.blocking_time_intermediate_node * 2
+        new_bt_end_node_ = self.blocking_times.blocking_time_end_node * 2
+        for node in self.nodes:
+            if node.is_end_node:
+                new_bt_end_node_ += self.distance
+            else:
+                new_bt_int_node_ += self.distance
+        new_bt_int_node = new_bt_int_node_ / success_rate
+        new_bt_end_node = new_bt_end_node_ / success_rate
+        return BlockingTimes(new_bt_int_node, new_bt_end_node)
     def calc_success_rate_of_purification(self) -> float:
         return calc_success_rate_of_purification(self.fidelity, self.fidelity)
 
@@ -169,7 +180,7 @@ class BlockingTimes:
         self.blocking_time_intermediate_node = bloking_time_intermediate_node
         self.blocking_time_end_node = blocking_time_end_node
     def __repr__(self):
-        return "(b_time_interm_node:"+ '{:.5g}'.format(self.blocking_time_intermediate_node) +", b_time_end_node:"+ '{:5g}'.format(self.blocking_time_end_node)
+        return "(b_time_interm_node:"+ '{:.5g}'.format(self.blocking_time_intermediate_node) +", b_time_end_node:"+ '{:.5g}'.format(self.blocking_time_end_node) + ")"
 
 def calc_new_fidelity_by_entanglement_swapping(input_fidelity_left, input_fidelity_right) -> float:
     return input_fidelity_left * input_fidelity_right
