@@ -7,8 +7,9 @@ def load_json(json_file):
         json_dict = json.load(fd)
 
         fidelity_raw_bellpair = float(json_dict['fidelity_raw_bellpair'])
-        local_target_fidelity = float(json_dict['local_target_fidelity'])
-        target_fidelity = float(json_dict['target_fidelity'])
+        layer2_target_fidelity = float(json_dict['layer2_target_fidelity'])
+        layer3_target_fidelity = float(json_dict['layer3_target_fidelity'])
+        layer4_target_fidelity = float(json_dict['layer4_target_fidelity'])
         p_op_int_node = float(json_dict['p_op_int_node'])
         p_mem_int_node = float(json_dict['p_mem_int_node'])
         p_op_end_node = float(json_dict['p_op_end_node'])
@@ -17,7 +18,7 @@ def load_json(json_file):
         purification_at_int_nodes = bool(json_dict['purification_at_int_nodes'])
         file_out = json_dict['file_out']
 
-    return fidelity_raw_bellpair, local_target_fidelity, target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes, file_out, json_dict
+    return fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes, file_out, json_dict
 
 def save_json(json_file, link_fidelity, link_bt_int_node, link_bt_end_node, e2e_raw_fidelity, e2e_raw_bt_int_node, e2e_raw_bt_end_node, e2e_final_fidelity, e2e_final_bt_int_node, e2e_final_bt_end_node, settings):
     json_dict = {
@@ -44,23 +45,24 @@ def save_json(json_file, link_fidelity, link_bt_int_node, link_bt_end_node, e2e_
 
 def main():
     if sys.argv.__len__() == 2:
-        fidelity_raw_bellpair, local_target_fidelity, target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes, file_out, settings = load_json(sys.argv[1])
+        fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes, file_out, settings = load_json(sys.argv[1])
     else:
         fidelity_raw_bellpair = float(sys.argv[1])
-        local_target_fidelity = float(sys.argv[2])
-        target_fidelity = float(sys.argv[3])
-        p_op_int_node = float(sys.argv[4])
-        p_mem_int_node = float(sys.argv[5])
-        p_op_end_node = float(sys.argv[6])
-        p_mem_end_node = float(sys.argv[7])
-        num_node = int(sys.argv[8]) # linear network
-        purification_at_int_nodes = bool(sys.argv[9])
+        layer2_target_fidelity = float(sys.argv[2])
+        layer3_target_fidelity = float(sys.argv[3])
+        layer4_target_fidelity = float(sys.argv[4])
+        p_op_int_node = float(sys.argv[5])
+        p_mem_int_node = float(sys.argv[6])
+        p_op_end_node = float(sys.argv[7])
+        p_mem_end_node = float(sys.argv[8])
+        num_node = int(sys.argv[9]) # linear network
+        purification_at_int_nodes = bool(sys.argv[10])
         file_out = None
         settings = None
     
     nodes, links = prepare_nodes_and_links(num_node, fidelity_raw_bellpair, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node)
 
-    output = calc_fidelity_and_blocking_time(nodes, links, local_target_fidelity, target_fidelity, purification_at_int_nodes)
+    output = calc_fidelity_and_blocking_time(nodes, links, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, purification_at_int_nodes)
     if output is False:
         with open(file_out, 'w') as fd:
             json.dump({'success': False,'settings': settings}, fd, indent=4)
@@ -83,7 +85,7 @@ def prepare_nodes_and_links(num_node, fidelity_raw_bellpair, p_op_int_node, p_me
         link.connect(nodes[i], nodes[i+1])
     return nodes, links
 
-def calc_fidelity_and_blocking_time(nodes, links, local_target_fidelity, target_fidelity, purification_at_int_nodes):
+def calc_fidelity_and_blocking_time(nodes, links, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, purification_at_int_nodes):
     bpp_single_layer = []
     bpp_all_layers = [bpp_single_layer]
     for i in range(len(links)):
@@ -91,7 +93,7 @@ def calc_fidelity_and_blocking_time(nodes, links, local_target_fidelity, target_
         bpp_single_layer.append(local_bpp)
     
     for local_bpp in bpp_single_layer:
-        if not local_bpp.repeat_purification_until_target_fidelity(local_target_fidelity):
+        if not local_bpp.repeat_purification_until_target_fidelity(layer2_target_fidelity):
             return False
         tmp1 = local_bpp.fidelity, local_bpp.blocking_times
 
@@ -109,13 +111,13 @@ def calc_fidelity_and_blocking_time(nodes, links, local_target_fidelity, target_
             bpp.process_entanglement_swapping()
             bpp_single_layer.append(bpp)
             if purification_at_int_nodes:
-                if not bpp.repeat_purification_until_target_fidelity(target_fidelity):
+                if not bpp.repeat_purification_until_target_fidelity(layer3_target_fidelity):
                     return False
         if bpp_single_layer.__len__() == 1:
             break
     bpp = bpp_all_layers[-1][-1]
     tmp2 = bpp.fidelity, bpp.blocking_times
-    if not bpp.repeat_purification_until_target_fidelity(target_fidelity):
+    if not bpp.repeat_purification_until_target_fidelity(layer4_target_fidelity):
         return False
     return tmp1, tmp2, bpp.fidelity, bpp.blocking_times
 
