@@ -36,8 +36,8 @@ def main():
                                         str(p_mem_end_node_) + "_" +\
                                         str(num_node_) + "_" +\
                                         str(purification_at_int_nodes_)
-                                        file_input = base_string + "_input.json"
-                                        file_output = directory_out + base_string + "_output.json"
+                                        file_input = directory_out + base_string + "_input.json"
+                                        file_output = base_string + "_output.json"
                                         json_dict = {
                                             'fidelity_raw_bellpair': fidelity_raw_bellpair_,
                                             'local_target_fidelity': local_target_fidelity_,
