@@ -2,7 +2,8 @@ import sys
 import json
 
 def parameters():
-    directory_out = 'data/'
+    directory_in = 'input/'
+    directory_out = 'output/'
     fidelity_raw_bellpair = [0.84]
     local_target_fidelity = [0.99, 0.999, 0.9999]
     target_fidelity = [0.99, 0.999, 0.9999]
@@ -12,10 +13,10 @@ def parameters():
     p_mem_end_node = [0.01, 0.001, 0.0001]
     num_node = [i for i in range(2, 66)]
     purification_at_int_nodes = [False, True]
-    return directory_out, fidelity_raw_bellpair,local_target_fidelity,target_fidelity,p_op_int_node,p_mem_int_node,p_op_end_node,p_mem_end_node,num_node,purification_at_int_nodes
+    return directory_in, directory_out, fidelity_raw_bellpair,local_target_fidelity,target_fidelity,p_op_int_node,p_mem_int_node,p_op_end_node,p_mem_end_node,num_node,purification_at_int_nodes
 
 def main():
-    directory_out, fidelity_raw_bellpair, local_target_fidelity, target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes = parameters()
+    directory_in, directory_out, fidelity_raw_bellpair, local_target_fidelity, target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes = parameters()
 
     for fidelity_raw_bellpair_ in fidelity_raw_bellpair:
         for local_target_fidelity_ in local_target_fidelity:
@@ -36,8 +37,8 @@ def main():
                                         str(p_mem_end_node_) + "_" +\
                                         str(num_node_) + "_" +\
                                         str(purification_at_int_nodes_)
-                                        file_input = directory_out + base_string + "_input.json"
-                                        file_output = base_string + "_output.json"
+                                        file_input = directory_in + base_string + "_input.json"
+                                        file_output = directory_out + base_string + "_output.json"
                                         json_dict = {
                                             'fidelity_raw_bellpair': fidelity_raw_bellpair_,
                                             'local_target_fidelity': local_target_fidelity_,
