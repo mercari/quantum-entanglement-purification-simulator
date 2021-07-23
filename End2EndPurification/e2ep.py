@@ -17,10 +17,11 @@ def load_json(json_file):
         purification_at_int_nodes = bool(json_dict['purification_at_int_nodes'])
         file_out = json_dict['file_out']
 
-    return fidelity_raw_bellpair, local_target_fidelity, target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes, file_out
+    return fidelity_raw_bellpair, local_target_fidelity, target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes, file_out, json_dict
 
-def save_json(json_file, link_fidelity, link_bt_int_node, link_bt_end_node, e2e_raw_fidelity, e2e_raw_bt_int_node, e2e_raw_bt_end_node, e2e_final_fidelity, e2e_final_bt_int_node, e2e_final_bt_end_node):
+def save_json(json_file, link_fidelity, link_bt_int_node, link_bt_end_node, e2e_raw_fidelity, e2e_raw_bt_int_node, e2e_raw_bt_end_node, e2e_final_fidelity, e2e_final_bt_int_node, e2e_final_bt_end_node, settings):
     json_dict = {
+                    'success': True,
                     'link': {
                         'fidelity': link_fidelity,
                         'bt_int_node': link_bt_int_node,
@@ -35,14 +36,15 @@ def save_json(json_file, link_fidelity, link_bt_int_node, link_bt_end_node, e2e_
                         'fidelity': e2e_final_fidelity,
                         'bt_int_node': e2e_final_bt_int_node,
                         'bt_end_node': e2e_final_bt_end_node
-                    }
+                    },
+                    'settings': settings
                 }
     with open(json_file, 'w') as fd:
-        json.dump(json_dict, fd)
+        json.dump(json_dict, fd, indent=4)
 
 def main():
     if sys.argv.__len__() == 2:
-        fidelity_raw_bellpair, local_target_fidelity, target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes, file_out = load_json(sys.argv[1])
+        fidelity_raw_bellpair, local_target_fidelity, target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes, file_out, settings = load_json(sys.argv[1])
     else:
         fidelity_raw_bellpair = float(sys.argv[1])
         local_target_fidelity = float(sys.argv[2])
@@ -54,17 +56,22 @@ def main():
         num_node = int(sys.argv[8]) # linear network
         purification_at_int_nodes = bool(sys.argv[9])
         file_out = None
+        settings = None
     
     nodes, links = prepare_nodes_and_links(num_node, fidelity_raw_bellpair, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node)
 
     output = calc_fidelity_and_blocking_time(nodes, links, local_target_fidelity, target_fidelity, purification_at_int_nodes)
+    if output is False:
+        with open(file_out, 'w') as fd:
+            json.dump({'success': False,'settings': settings}, fd, indent=4)
+        return
     print(output)
     (link_fidelity, bt_link), (e2e_raw_fidelity, bt_e2e_raw), e2e_final_fidelity, bt_e2e_final = output
     link_bt_int_node, link_bt_end_node = bt_link.blocking_time_int_node, bt_link.blocking_time_end_node
     e2e_raw_bt_int_node, e2e_raw_bt_end_node = bt_e2e_raw.blocking_time_int_node, bt_e2e_raw.blocking_time_end_node
     e2e_final_bt_int_node, e2e_final_bt_end_node = bt_e2e_final.blocking_time_int_node, bt_e2e_final.blocking_time_end_node
     if file_out:
-        save_json(file_out, link_fidelity, link_bt_int_node, link_bt_end_node, e2e_raw_fidelity, e2e_raw_bt_int_node, e2e_raw_bt_end_node, e2e_final_fidelity, e2e_final_bt_int_node, e2e_final_bt_end_node)
+        save_json(file_out, link_fidelity, link_bt_int_node, link_bt_end_node, e2e_raw_fidelity, e2e_raw_bt_int_node, e2e_raw_bt_end_node, e2e_final_fidelity, e2e_final_bt_int_node, e2e_final_bt_end_node, settings)
 
 def prepare_nodes_and_links(num_node, fidelity_raw_bellpair, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node):
     nodes = [Node(True, p_op_end_node, p_mem_end_node)] + [Node(False, p_op_int_node, p_mem_int_node) for _ in range(num_node-2)] + [Node(True, p_op_end_node, p_mem_end_node)]
@@ -84,7 +91,8 @@ def calc_fidelity_and_blocking_time(nodes, links, local_target_fidelity, target_
         bpp_single_layer.append(local_bpp)
     
     for local_bpp in bpp_single_layer:
-        local_bpp.repeat_purification_until_target_fidelity(local_target_fidelity)
+        if not local_bpp.repeat_purification_until_target_fidelity(local_target_fidelity):
+            return False
         tmp1 = local_bpp.fidelity, local_bpp.blocking_times
 
     while True:
@@ -101,12 +109,14 @@ def calc_fidelity_and_blocking_time(nodes, links, local_target_fidelity, target_
             bpp.process_entanglement_swapping()
             bpp_single_layer.append(bpp)
             if purification_at_int_nodes:
-                bpp.repeat_purification_until_target_fidelity(target_fidelity)
+                if not bpp.repeat_purification_until_target_fidelity(target_fidelity):
+                    return False
         if bpp_single_layer.__len__() == 1:
             break
     bpp = bpp_all_layers[-1][-1]
     tmp2 = bpp.fidelity, bpp.blocking_times
-    bpp.repeat_purification_until_target_fidelity(target_fidelity)
+    if not bpp.repeat_purification_until_target_fidelity(target_fidelity):
+        return False
     return tmp1, tmp2, bpp.fidelity, bpp.blocking_times
 
 
@@ -178,6 +188,9 @@ class BellPairProcessor:
         return btl
 
     def process_purification(self):
+        if self.fidelity <= 0.5 or self.blocking_times.blocking_time_int_node >= BlockingTimes.LIMIT or self.blocking_times.blocking_time_end_node >= BlockingTimes.LIMIT:
+            # fidelity less than 0.5 cannot be improved
+            return False
         success_rate = calc_success_rate_of_purification(self.fidelity, self.fidelity)
         
         self.success_rate_repetition_log.append(success_rate)
@@ -195,6 +208,7 @@ class BellPairProcessor:
            (1-self.nodes[0].p_op) * (1-self.nodes[1].p_op)
             
         print(self.fidelity, self.blocking_times)
+        return True
     def calc_new_fidelity_by_purification(self) -> float:
         return calc_new_fidelity_by_purification(self.fidelity, self.fidelity)
     def calc_new_blocking_time_by_purification(self):
@@ -215,7 +229,9 @@ class BellPairProcessor:
 
     def repeat_purification_until_target_fidelity(self, target_fidelity):
         while self.fidelity < target_fidelity:
-            self.process_purification()
+            if not self.process_purification():
+                return False
+        return True
 
 class LocalBellPairProcessor(BellPairProcessor):
     def __init__(self, node_left: Node, node_right: Node, link: Link) -> None:
@@ -241,6 +257,7 @@ class LocalBellPairProcessor(BellPairProcessor):
         return 1
 
 class BlockingTimes:
+    LIMIT = 1000000
     def __init__(self, bloking_time_int_node, blocking_time_end_node) -> None:
         self.blocking_time_int_node = bloking_time_int_node
         self.blocking_time_end_node = blocking_time_end_node
