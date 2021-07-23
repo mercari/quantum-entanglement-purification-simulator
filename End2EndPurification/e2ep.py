@@ -10,7 +10,7 @@ def load_json(json_file):
         local_target_fidelity = float(json_dict['local_target_fidelity'])
         target_fidelity = float(json_dict['target_fidelity'])
         p_op_int_node = float(json_dict['p_op_int_node'])
-        p_mem_int_node = float(json_dict['p_mem_intnode'])
+        p_mem_int_node = float(json_dict['p_mem_int_node'])
         p_op_end_node = float(json_dict['p_op_end_node'])
         p_mem_end_node = float(json_dict['p_mem_end_node'])
         num_node = int(json_dict['num_node'])

@@ -3,7 +3,7 @@
     "local_target_fidelity": 0.99,
     "target_fidelity": 0.99,
     "p_op_int_node": 0.001,
-    "p_mem_intnode": 0.001,
+    "p_mem_int_node": 0.001,
     "p_op_end_node": 0.0001,
     "p_mem_end_node": 0.0001,
     "num_node": 5,
