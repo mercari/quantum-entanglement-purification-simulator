@@ -3,14 +3,23 @@ import json
 import itertools, functools
 from math import floor
 import concurrent.futures
-from parameters import parameters
 from generate_simulation_cases import generate_file_name, calc_parameter_product_length
 from e2ep import run_with_setting_file, run
+from importlib import import_module
+import shutil
 
 def main():
-    directory_root, fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes = parameters()
+    parameter_file_name = sys.argv[1]
+    parameter_module_name = parameter_file_name.split("/")[1].split(".")[0]
+    parameter_module = import_module(parameter_module_name)
 
-    length = calc_parameter_product_length(parameters)
+    directory_root, fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes = parameter_module.parameters()
+
+    if not os.path.exists(directory_root):
+        os.makedirs(directory_root, exist_ok=True)
+    shutil.copy(parameter_file_name, directory_root)
+
+    length = calc_parameter_product_length(parameter_module.parameters)
 
     cases = itertools.product([(length, directory_root)], fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes)
 

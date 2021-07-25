@@ -2,12 +2,15 @@ import sys, os, time
 import json
 import itertools, functools
 import concurrent.futures
-from parameters import parameters
+from importlib import import_module
 
 def main():
-    directory_root, fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes = parameters()
+    parameter_module_name = sys.argv[1].split("/")[1].split(".")[0]
+    parameter_module = import_module(parameter_module_name)
 
-    length = calc_parameter_product_length(parameters)
+    directory_root, fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes = parameter_module.parameters()
+
+    length = calc_parameter_product_length(parameter_module.parameters)
     time.sleep(1)
 
     cases = itertools.product([(length, directory_root)], fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes)
