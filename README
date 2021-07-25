@@ -1,0 +1,5 @@
+program% python3 End2EndPurification/generate_simulation_cases.py End2EndPurification/parameters_template.py
+
+or
+
+%python3 End2EndPurification/executor.py End2EndPurification/parameters_template.py
