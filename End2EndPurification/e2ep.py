@@ -45,8 +45,9 @@ def save_json(json_file, link_fidelity, link_bt_int_node, link_bt_end_node, e2e_
 
 def main():
     if sys.argv.__len__() == 2:
-        fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes, file_out, settings = load_json(sys.argv[1])
-    else:
+        run_with_setting_file(sys.argv[1])
+        return True
+    elif sys.argv.__len__() == 11:
         fidelity_raw_bellpair = float(sys.argv[1])
         layer2_target_fidelity = float(sys.argv[2])
         layer3_target_fidelity = float(sys.argv[3])
@@ -59,7 +60,18 @@ def main():
         purification_at_int_nodes = bool(sys.argv[10])
         file_out = None
         settings = None
-    
+
+        run(fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes, file_out, settings)
+        return True
+    print("Error. Simulation don't run.")
+    return False
+
+def run_with_setting_file(setting_file):
+    fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes, file_out, settings = load_json(setting_file)
+
+    run(fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes, file_out, settings)
+
+def run(fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes, file_out, settings):
     nodes, links = prepare_nodes_and_links(num_node, fidelity_raw_bellpair, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node)
 
     output = calc_fidelity_and_blocking_time(nodes, links, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, purification_at_int_nodes)
@@ -67,7 +79,7 @@ def main():
         with open(file_out, 'w') as fd:
             json.dump({'success': False,'settings': settings}, fd, indent=4)
         return
-    print(output)
+    #print(output)
     (link_fidelity, bt_link), (e2e_raw_fidelity, bt_e2e_raw), e2e_final_fidelity, bt_e2e_final = output
     link_bt_int_node, link_bt_end_node = bt_link.blocking_time_int_node, bt_link.blocking_time_end_node
     e2e_raw_bt_int_node, e2e_raw_bt_end_node = bt_e2e_raw.blocking_time_int_node, bt_e2e_raw.blocking_time_end_node
@@ -209,7 +221,7 @@ class BellPairProcessor:
            (((1-self.nodes[0].p_mem) * (1-self.nodes[1].p_mem))**(self.distance)) * \
            (1-self.nodes[0].p_op) * (1-self.nodes[1].p_op)
             
-        print(self.fidelity, self.blocking_times)
+        #print(self.fidelity, self.blocking_times)
         return True
     def calc_new_fidelity_by_purification(self) -> float:
         return calc_new_fidelity_by_purification(self.fidelity, self.fidelity)

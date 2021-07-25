@@ -1,31 +1,47 @@
-import sys, os, time
+import sys, os, time, datetime
 import json
 import itertools, functools
+from math import floor
 import concurrent.futures
 from parameters import parameters
+from generate_simulation_cases import generate_file_name, calc_parameter_product_length
+from e2ep import run_with_setting_file, run
 
 def main():
     directory_root, fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes = parameters()
 
     length = calc_parameter_product_length(parameters)
-    time.sleep(1)
 
     cases = itertools.product([(length, directory_root)], fidelity_raw_bellpair, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, p_op_int_node, p_mem_int_node, p_op_end_node, p_mem_end_node, num_node, purification_at_int_nodes)
 
-    with concurrent.futures.ProcessPoolExecutor(max_workers=100) as executor:
-        executor.map(one_process, zip(range(length), cases))
+    num_workers = 9
+    start_and_stop = [(floor(length*i/num_workers), floor(length*(i+1)/num_workers)) for i in range(num_workers)]
+    print(start_and_stop)
+    time.sleep(1)
 
-def calc_parameter_product_length(parameters):
-    def times(a,b):
-        return a*b
-    length = functools.reduce(times, map(len, parameters()))
-    return length
-    
-def one_process(num_case):
-    num, case = num_case
+    with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
+        for i in range(num_workers):
+            executor.submit(one_process, cases, i, start_and_stop)
+
+def one_process(cases, i, start_and_stop):
+    print("one_process")
+    gen = itertools.islice(cases, start_and_stop[i][0], start_and_stop[i][1])
+    length = start_and_stop[i][1] - start_and_stop[i][0]
+    print("length:%d"%length)
+    count = 0
+    start_time = datetime.datetime.now()
+    for case in gen:
+        count += 1
+        one_simulation(case)
+        if i == 0:
+            print("{:,}/{:,}".format(count,length), datetime.datetime.now() - start_time)
+
+
+def one_simulation(case):
     (length, directory_root), fidelity_raw_bellpair_, layer2_target_fidelity_, layer3_target_fidelity_, layer4_target_fidelity_, p_op_int_node_, p_mem_int_node_, p_op_end_node_, p_mem_end_node_, num_node_, purification_at_int_nodes_ = case
 
     directory, file_output, file_input = generate_file_name(directory_root, fidelity_raw_bellpair_, layer2_target_fidelity_, layer3_target_fidelity_, layer4_target_fidelity_, p_op_int_node_, p_mem_int_node_, p_op_end_node_, p_mem_end_node_, num_node_, purification_at_int_nodes_)
+
     json_dict = {
         'fidelity_raw_bellpair': fidelity_raw_bellpair_,
         'layer2_target_fidelity': layer2_target_fidelity_,
@@ -40,42 +56,15 @@ def one_process(num_case):
         'file_out': file_output
     }
 
-    print("{:,}/{:,}".format(num,length))
     if not os.path.exists(directory):
         os.makedirs(directory, exist_ok=True)
-    with open(file_input, 'w') as fd:
-        json.dump(json_dict, fd, indent=4)
 
-def generate_file_name(directory_root, fidelity_raw_bellpair_, layer2_target_fidelity_, layer3_target_fidelity_, layer4_target_fidelity_, p_op_int_node_, p_mem_int_node_, p_op_end_node_, p_mem_end_node_, num_node_, purification_at_int_nodes_):
-    base_string = \
-    str(fidelity_raw_bellpair_) + "_" +\
-    str(layer2_target_fidelity_) + "_" +\
-    str(layer3_target_fidelity_) + "_" +\
-    str(layer4_target_fidelity_) + "_" +\
-    str(p_op_int_node_) + "_" +\
-    str(p_mem_int_node_) + "_" +\
-    str(p_op_end_node_) + "_" +\
-    str(p_mem_end_node_) + "_" +\
-    str(num_node_) + "_" +\
-    str(purification_at_int_nodes_)
+    retval = run(fidelity_raw_bellpair_, layer2_target_fidelity_, layer3_target_fidelity_, layer4_target_fidelity_, p_op_int_node_, p_mem_int_node_, p_op_end_node_, p_mem_end_node_, num_node_, purification_at_int_nodes_, file_output, 
+    json_dict)
 
-    directory = \
-    directory_root + "/" +\
-    str(fidelity_raw_bellpair_) + "/" +\
-    str(layer2_target_fidelity_) + "/" +\
-    str(layer3_target_fidelity_) + "/" +\
-    str(layer4_target_fidelity_) + "/" +\
-    str(p_op_int_node_) + "/" +\
-    str(p_mem_int_node_) + "/" +\
-    str(p_op_end_node_) + "/" +\
-    str(p_mem_end_node_) + "/" +\
-    str(num_node_) + "/" +\
-    str(purification_at_int_nodes_)
+    return retval
 
-    file_input = directory + "/" + base_string + "_input.json"
-    file_output = directory + "/" + base_string + "_output.json"
-    #print (directory, file_output, file_input)
-    return directory, file_output, file_input
+
 
 
 if __name__ == '__main__':
