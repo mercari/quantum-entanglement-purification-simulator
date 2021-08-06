@@ -1,6 +1,7 @@
 #from _typeshed import Self
 import sys
 import json
+import math
 try:
     from fidelity import Fidelity, fidelity_to_p, p_to_fidelity
 except:
@@ -119,39 +120,54 @@ def prepare_nodes_and_links(num_node, fidelity_raw_bellpair, p_op_int_node, p_me
 def calc_fidelity_and_blocking_time(nodes, links, layer2_target_fidelity, layer3_target_fidelity, layer4_target_fidelity, purification_at_int_nodes):
     bpp_single_layer = []
     bpp_all_layers = [bpp_single_layer]
+
+    # generate Layer2 bpp 
     for i in range(len(links)):
         local_bpp = LocalBellPairProcessor(nodes[i], nodes[i+1], links[i])
         bpp_single_layer.append(local_bpp)
     
+    # process Layer2 bpp
     for local_bpp in bpp_single_layer:
         if not local_bpp.repeat_purification_until_target_fidelity(layer2_target_fidelity):
             return False
         tmp1 = local_bpp.fidelity, local_bpp.blocking_times
 
+    # process Layer3 bpp
     while True:
-        bpp_single_layer_prev = bpp_single_layer
-        bpp_single_layer = []
-        bpp_all_layers.append(bpp_single_layer)
+        res, bpp_single_layer = process_layer3_bpp_one_round(bpp_single_layer, purification_at_int_nodes, layer3_target_fidelity)
 
-        tmp = bpp_single_layer_prev.copy()
-        while tmp != []:
-            if tmp.__len__() == 1:
-                bpp_single_layer.append(tmp.pop(0))
-                break
-            bpp = BellPairProcessor(tmp.pop(0), tmp.pop(0))
-            bpp.process_entanglement_swapping()
-            bpp_single_layer.append(bpp)
-            if purification_at_int_nodes:
-                if not bpp.repeat_purification_until_target_fidelity(layer3_target_fidelity):
-                    return False
+        if res:
+            bpp_all_layers.append(bpp_single_layer)
+        else:
+            return False
+
         if bpp_single_layer.__len__() == 1:
+            # End-to-End bpp is achieved
             break
+
+    # process Layer4 bpp (End-to-End bpp)
     bpp = bpp_all_layers[-1][-1]
     tmp2 = bpp.fidelity, bpp.blocking_times
     if not bpp.repeat_purification_until_target_fidelity(layer4_target_fidelity):
         return False
+
     return tmp1, tmp2, bpp.fidelity, bpp.blocking_times
 
+def process_layer3_bpp_one_round(bpp_single_layer_prev, purification_at_int_nodes, layer3_target_fidelity):
+    bpp_single_layer = []
+
+    tmp = bpp_single_layer_prev.copy()
+    while tmp != []:
+        if tmp.__len__() == 1:
+            bpp_single_layer.append(tmp.pop(0))
+            break
+        bpp = BellPairProcessor(tmp.pop(0), tmp.pop(0))
+        bpp.process_entanglement_swapping()
+        bpp_single_layer.append(bpp)
+        if purification_at_int_nodes:
+            if not bpp.repeat_purification_until_target_fidelity(layer3_target_fidelity):
+                return False, None
+    return True, bpp_single_layer
 
 
 if __name__ == "__main__":
