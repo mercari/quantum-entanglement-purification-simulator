@@ -9,8 +9,7 @@ class Distance:
     def calc_duration(self):
         return self.distance / self.speed
     def calc_time_unit(self, time_unit_length):
-        return self.calc_duration / time_unit_length
+        return self.calc_duration() / time_unit_length
     @staticmethod
     def sum_distances(distance_left, distance_right):
         return Distance(distance_left.distance + distance_right.distance, distance_left.transmission_time + distance_right.transmission_time)
-    
