@@ -8,7 +8,9 @@ class BlockingTimes:
     @staticmethod
     def merge_blocking_times(bt_left, bt_right):
         return BlockingTimes(bt_left.blocking_time_int_node+bt_right.blocking_time_int_node, bt_left.blocking_time_end_node + bt_right.blocking_time_end_node)
+    @staticmethod
     def add_blocking_times(self, blocking_time_int_node, blocking_time_end_node):
         return BlockingTimes(self.blocking_time_int_node + blocking_time_int_node, self.blocking_time_end_node + blocking_time_end_node)
+    @staticmethod
     def multiply_blocking_times(self, multiplier):
         return BlockingTimes(self.blocking_time_int_node * multiplier, self.blocking_time_end_node * multiplier)
