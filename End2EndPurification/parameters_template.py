@@ -9,7 +9,7 @@ class Parameters:
         self.p_mem_int_node = [0.01, 0.001, 0.0001]
         self.p_op_end_node = [0.01, 0.001, 0.0001, 0]
         self.p_mem_end_node = [0.01, 0.001, 0.0001, 0]
-        self.num_node = [i for i in range(2, 65)] # [i for i in range(100, 2001, 100)]
+        self.num_node = [i for i in range(65, 257)] # [i for i in range(100, 2001, 100)]
         self.purification_at_int_nodes = [False, True]
     def iterating_parameters(self):
         return self.fidelity_raw_bellpair,self.layer2_target_fidelity,self.layer3_target_fidelity,self.layer4_target_fidelity,self.p_op_int_node,self.p_mem_int_node,self.p_op_end_node,self.p_mem_end_node,self.num_node,self.purification_at_int_nodes

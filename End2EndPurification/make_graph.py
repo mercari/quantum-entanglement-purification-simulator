@@ -16,15 +16,15 @@ def main():
     parameter_module = import_module(parameter_module_name)
     """
 
-    directory_root = "../data3/"
+    directory_root = "../data1/"
     fidelity_raw_bellpair_ = 0.8
     layer2_target_fidelity_ = 0.99
     layer3_target_fidelity_ = 0.9
     layer4_target_fidelity_ = 0.99
     p_op_int_node_  = 0.001
     p_mem_int_node_ = 0.001
-    p_op_end_node_  = 0.00001
-    p_mem_end_node_ = 0.00001
+    p_op_end_node_  = 0
+    p_mem_end_node_ = 0
 
     # [i for i in range(100, 2001, 100)]
 
@@ -40,6 +40,7 @@ def main():
 
     print(len(num_nodes))
     print(len(false_e2e_final_int_node))
+    print(false_e2e_final_total_node)
 
     fig, ax = plt.subplots(figsize=(10,10),dpi=200) 
     ax.set_yscale('log')
@@ -55,7 +56,7 @@ def main():
     ax.set_title(title)
     ax.legend()
     plt.show()
-    fig.savefig(title+".pdf")
+    fig.savefig(directory_root + title + ".pdf")
 
 
 def collect_num_node(directory_root, fidelity_raw_bellpair_, layer2_target_fidelity_, layer3_target_fidelity_, layer4_target_fidelity_, p_op_int_node_, p_mem_int_node_, p_op_end_node_, p_mem_end_node_, num_nodes, purification_at_int_nodes_):
