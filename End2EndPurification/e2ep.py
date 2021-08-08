@@ -61,7 +61,7 @@ def run(config):
     output = calc_fidelity_and_blocking_time(nodes, links, config)
     if output is False:
         with open(config.file_out, 'w') as fd:
-            json.dump({'success': False,'settings': config.setting}, fd, indent=4)
+            json.dump({'success': False,'settings': config.settings}, fd, indent=4)
         return
     #print(output)
     (link_fidelity, bt_link), (e2e_raw_fidelity, bt_e2e_raw), (e2e_final_fidelity, bt_e2e_final) = output

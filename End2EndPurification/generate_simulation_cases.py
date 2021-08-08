@@ -25,10 +25,10 @@ def main():
     with concurrent.futures.ProcessPoolExecutor(max_workers=100) as executor:
         executor.map(one_process, zip(range(length), cases))
 
-def calc_parameter_product_length(parameters):
+def calc_parameter_product_length(iterating_parameters):
     def times(a,b):
         return a*b
-    length = functools.reduce(times, map(len, parameters()))
+    length = functools.reduce(times, map(len, iterating_parameters))
     return length
     
 def one_process(num_case):

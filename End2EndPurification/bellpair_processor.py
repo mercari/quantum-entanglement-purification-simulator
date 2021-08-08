@@ -79,7 +79,7 @@ class BellPairProcessor:
         # fidelity decrease by operation (gate) error
         # (fidelity decrease by memorying) <- next operation does not need to wait pauli frames of E.S.
         self.fidelity = self.calc_new_fidelity_by_entanglement_swapping()
-        print(__name__, self.fidelity)
+        #print(__name__, self.fidelity)
         #(((1-self.nodes[0].p_mem) * (1-self.nodes[1].p_mem))**(self.distance)) * \
 
         self.blocking_times = self.calc_new_blocking_time_by_entanglement_swapping()
@@ -103,18 +103,18 @@ class BellPairProcessor:
 
         self.blocking_times = self.calc_new_blocking_time_by_purification()
 
-        print(self.fidelity)
+        #print(self.fidelity)
 
         # fidelity increase by purification  
         # fidelity decrease by operation (gate) error
         self.fidelity = self.calc_new_fidelity_by_purification()
 
-        print(self.fidelity)
+        #print(self.fidelity)
 
         # fidelity decrease by memorying during sending pauli frame
         self.fidelity = self.calc_decoherence_during_classical_transmission()
 
-        print(self.fidelity, self.blocking_times)
+        #print(self.fidelity, self.blocking_times)
 
         return True
     def calc_new_fidelity_by_purification(self) -> float:
@@ -175,7 +175,7 @@ class LocalBellPairProcessor(BellPairProcessor):
                 # init Bell pair
                 bt_int_node += node.unit_time
         self.blocking_times = BlockingTimes(bt_int_node, bt_end_node)
-        print("lbpp init:", self.blocking_times)
+        #print("lbpp init:", self.blocking_times)
 
     def register_nodes(self):
         return [self.node_left, self.node_right], None
