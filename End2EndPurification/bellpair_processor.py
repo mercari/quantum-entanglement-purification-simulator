@@ -1,9 +1,11 @@
 import math
 
 try:
-    from fidelity import Fidelity, fidelity_to_p, p_to_fidelity
+    from fidelity import FidelityGeneralizedModel as Fidelity
+    from fidelity import fidelity_to_p, p_to_fidelity
 except:
-    from End2EndPurification.fidelity import Fidelity, fidelity_to_p, p_to_fidelity
+    from End2EndPurification.fidelity import FidelityGeneralizedModel as Fidelity
+    from End2EndPurification.fidelity import fidelity_to_p, p_to_fidelity
 
 try:
     from blocking_times import BlockingTimes

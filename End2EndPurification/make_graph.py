@@ -18,11 +18,11 @@ def main():
 
     directory_root = "../data1/"
     fidelity_raw_bellpair_ = 0.8
-    layer2_target_fidelity_ = 0.99
+    layer2_target_fidelity_ = 0.999
     layer3_target_fidelity_ = 0.9
     layer4_target_fidelity_ = 0.99
-    p_op_int_node_  = 0.001
-    p_mem_int_node_ = 0.001
+    p_op_int_node_  = 0.0001
+    p_mem_int_node_ = 0.0001
     p_op_end_node_  = 0
     p_mem_end_node_ = 0
 
@@ -30,7 +30,7 @@ def main():
 
     purification_at_int_nodes_ = False
 
-    num_nodes = [i for i in range(2, 65)]
+    num_nodes = [i for i in range(2, 257)]
 
     false_e2e_final_int_node, false_e2e_final_end_node, false_e2e_final_total_node = collect_num_node(directory_root, fidelity_raw_bellpair_, layer2_target_fidelity_, layer3_target_fidelity_, layer4_target_fidelity_, p_op_int_node_, p_mem_int_node_, p_op_end_node_, p_mem_end_node_, num_nodes, purification_at_int_nodes_)
 

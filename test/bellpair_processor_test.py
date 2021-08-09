@@ -1,3 +1,4 @@
+from End2EndPurification.bellpair_processor import Fidelity
 from unittest import TestCase
 
 from End2EndPurification.config import Config
@@ -59,8 +60,8 @@ class BellPairProcessorTest(TestCase):
     def test_calc_new_blocking_time_by_purification(self):
          for local_bpp in self.local_bpps:
             #new_fidelity = (self.config.fidelity_raw_bellpair**2)/(self.config.fidelity_raw_bellpair**2 + (1-self.config.fidelity_raw_bellpair)**2)
-            success_rate = (local_bpp.fidelity.fidelity**2 + (1-local_bpp.fidelity.fidelity)**2)
-            self.assertEqual(success_rate, local_bpp.fidelity.calc_success_rate_of_purification(local_bpp.fidelity, local_bpp.fidelity))
+            success_rate = Fidelity.calc_success_rate_of_purification(local_bpp.fidelity, local_bpp.fidelity)
+            #self.assertEqual(success_rate, local_bpp.fidelity.calc_success_rate_of_purification(local_bpp.fidelity, local_bpp.fidelity))
             bt = local_bpp.calc_new_blocking_time_by_purification()
             if local_bpp.node_left.is_end_node and local_bpp.node_right.is_end_node:
                 self.assertEqual(bt.blocking_time_int_node, 0)
