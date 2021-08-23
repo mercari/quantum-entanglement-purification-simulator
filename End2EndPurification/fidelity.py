@@ -75,7 +75,8 @@ class FidelityGeneralizedModel(Fidelity):
             [(1-memory_fidelity)/3, (1-memory_fidelity)/3, memory_fidelity, (1-memory_fidelity)/3],
             [(1-memory_fidelity)/3, (1-memory_fidelity)/3, (1-memory_fidelity)/3, memory_fidelity]
         ])
-        new_state = np.dot(fractional_matrix_power(noisy_i, num), input_fidelity.state)
+        u = np.linalg.matrix_power(noisy_i, int(num))
+        new_state = np.dot(u, input_fidelity.state)
         return FidelityGeneralizedModel(new_state)
     @staticmethod
     def calc_new_fidelity_by_entanglement_swapping(input_fidelity_left, input_fidelity_right, node_left, node_middle, node_right):
@@ -137,7 +138,8 @@ class FidelityGeneralizedModel(Fidelity):
        
         # - fidelities of source bell pairs
         abcd = FidelityGeneralizedModel.calc_new_fidelity_by_purification_alg(input_fidelity_left, input_fidelity_right)
-        fid = FidelityGeneralizedModel(abcd/FidelityGeneralizedModel.calc_success_rate_of_purification(input_fidelity_left, input_fidelity_right))
+        fid = FidelityGeneralizedModel(abcd / FidelityGeneralizedModel.calc_success_rate_of_purification(input_fidelity_left, input_fidelity_right))
+        #print("fid in FidelityG",fid)
 
         # - operation error of E.S.
         fid = FidelityGeneralizedModel.decohere_by_time(fid, p_to_fidelity(node_left.p_mem), node_left.unit_time/max(node_left.unit_time, node_right.unit_time))
@@ -149,7 +151,7 @@ class FidelityGeneralizedModel(Fidelity):
         # X→Z
         # Y→Y
         # Z→X
-        fid = np.dot(np.array([[1,0,0,0],[0,0,0,1],[0,0,1,0],[1,0,0,0]]), fid)
+        fid = FidelityGeneralizedModel(np.dot(np.array([[1,0,0,0],[0,0,0,1],[0,0,1,0],[0,1,0,0]]), fid.state))
 
         return fid
 
@@ -178,11 +180,12 @@ class FidelityGeneralizedModel(Fidelity):
 
         # - fidelities of source bell pairs
         # - improvement by purification itself
+        #print("input_fidelity_left", input_fidelity_left)
         a = np.dot(input_fidelity_left.state, np.dot(np.array([[1,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,1]]), input_fidelity_right.state))
         b = np.dot(input_fidelity_left.state, np.dot(np.array([[0,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,0]]), input_fidelity_right.state))
         c = np.dot(input_fidelity_left.state, np.dot(np.array([[0,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,0]]), input_fidelity_right.state))
         d = np.dot(input_fidelity_left.state, np.dot(np.array([[0,0,0,1],[0,0,0,0],[0,0,0,0],[1,0,0,0]]), input_fidelity_right.state))
-        print("abcd",a,b,c,d)
+        #print("abcd",a,b,c,d)
  
         return (a,b,c,d)
     @staticmethod

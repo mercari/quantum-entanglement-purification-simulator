@@ -46,9 +46,9 @@ def one_process(param, i, start_and_stop):
     start_time = datetime.datetime.now()
     for case in gen:
         count += 1
-        one_simulation(case)
         if i == 0:
             print("{:,}/{:,}".format(count,length), datetime.datetime.now() - start_time, case)
+        one_simulation(case)
 
 
 def one_simulation(case):

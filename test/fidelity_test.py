@@ -83,8 +83,14 @@ class FidelityGeneralizedModelTest(TestCase):
         for i in range(len(val)):
             self.assertAlmostEqual(float(fid.state[i]), val[i])
 
+        self.assertAlmostEqual(sum(fid.state), 1)
+
     def test_calc_new_fidelity_by_purification(self):
-        pass
+        fidelity_left = FidelityGeneralizedModel(0.98)
+        fidelity_right = FidelityGeneralizedModel(0.97)
+        fid = FidelityGeneralizedModel.calc_new_fidelity_by_purification(fidelity_left, fidelity_right, self.node_left, self.node_right)
+        print("fid",fid)
+        self.assertAlmostEqual(sum(fid.state), 1)
 
     def test_calc_new_fidelity_by_purification_alg(self):
         # φ+ ψ+ ψ- φ-

@@ -92,6 +92,7 @@ class BellPairProcessor:
         return bt
 
     def process_purification(self):
+        #print("self.fidelity.fidelity", self.fidelity.fidelity)
         if self.fidelity.fidelity <= 0.5 or self.blocking_times.blocking_time_int_node >= BlockingTimes.LIMIT or self.blocking_times.blocking_time_end_node >= BlockingTimes.LIMIT:
             # fidelity less than 0.5 cannot be improved
             return False
