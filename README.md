@@ -16,7 +16,7 @@ To run in batch, execute
 %python3 End2EndPurification/executor.py End2EndPurification/parameters_template.py
 ```
 
-Contribution
+# Contribution
 Please read the CLA below carefully before submitting your contribution.
 
 [https://www.mercari.com/cla/](https://www.mercari.com/cla/)
