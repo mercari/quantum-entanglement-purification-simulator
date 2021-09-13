@@ -90,6 +90,8 @@ def calc_fidelity_and_blocking_time(nodes, links, config):
         return False
     result = bpp_all_layers[-1][0].fidelity, bpp_all_layers[-1][0].blocking_times
 
+    #print_purification_depth(bpp_all_layers)
+
     return example_l2, example_l3, result
 
 def process_layer4_bpp(bpp_all_layers, layer4_target_fidelity):
@@ -126,7 +128,7 @@ def process_layer3_bpp_one_round(bpp_single_layer_prev, purification_at_int_node
     tmp = bpp_single_layer_prev.copy()
     while tmp != []:
         if tmp.__len__() == 1:
-            bpp_single_layer.append(tmp.pop(0))
+            bpp_single_layer.append(tmp.pop(0).copy())
             break
         bpp = BellPairProcessor(tmp.pop(0), tmp.pop(0))
         bpp.process_entanglement_swapping()
@@ -136,6 +138,10 @@ def process_layer3_bpp_one_round(bpp_single_layer_prev, purification_at_int_node
                 return False
     return bpp_single_layer
 
+
+def print_purification_depth(bpp_all_layers):
+    for bpp_layer in bpp_all_layers:
+        print([len(bpp_layer.fidelity_repetition_log) for bpp_layer in bpp_layer])
 
 if __name__ == "__main__":
     main()
