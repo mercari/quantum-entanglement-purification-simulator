@@ -60,6 +60,11 @@ class BellPairProcessor:
         self.fidelity_repetition_log = []
         self.blocking_time_repetition_log = []
         self.success_rate_repetition_log = []
+    def copy(self):
+        bpp = BellPairProcessor(self.bpp_left, self.bpp_right)
+        bpp.fidelity = self.fidelity
+        bpp.blocking_times = self.blocking_times
+        return bpp
     def register_nodes(self):
         nodes = []
         for node in self.bpp_left.nodes + self.bpp_right.nodes:
@@ -186,3 +191,8 @@ class LocalBellPairProcessor(BellPairProcessor):
     def calc_distance(self) -> int:
         return self.link.distance
 
+    def copy(self):
+        bpp = LocalBellPairProcessor(self.node_left, self.node_right, self.link)
+        bpp.fidelity = self.fidelity
+        bpp.blocking_times = self.blocking_times
+        return bpp
