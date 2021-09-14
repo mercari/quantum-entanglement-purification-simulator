@@ -16,13 +16,13 @@ def main():
     parameter_module = import_module(parameter_module_name)
     """
 
-    directory_root = "../data1/"
+    directory_root = '../data_generalizd_fidelity1/'
     fidelity_raw_bellpair_ = 0.8
     layer2_target_fidelity_ = 0.99
-    layer3_target_fidelity_ = 0.9
+    layer3_target_fidelity_ = 0.99
     layer4_target_fidelity_ = 0.99
-    p_op_int_node_  = 0.001
-    p_mem_int_node_ = 0.001
+    p_op_int_node_  = 0.0001
+    p_mem_int_node_ = 0.0001
     p_op_end_node_  = 0
     p_mem_end_node_ = 0
 
@@ -30,7 +30,7 @@ def main():
 
     purification_at_int_nodes_ = False
 
-    num_nodes = [i for i in range(2, 65)]
+    num_nodes = [i for i in range(2, 257)]
 
     false_e2e_final_int_node, false_e2e_final_end_node, false_e2e_final_total_node = collect_num_node(directory_root, fidelity_raw_bellpair_, layer2_target_fidelity_, layer3_target_fidelity_, layer4_target_fidelity_, p_op_int_node_, p_mem_int_node_, p_op_end_node_, p_mem_end_node_, num_nodes, purification_at_int_nodes_)
 
@@ -52,7 +52,7 @@ def main():
     ax.plot(num_nodes, true_e2e_final_total_node, label='Block. Time of Both Nodes with non-E2E Pur.', ls='dashed', marker='s', color='red')
     ax.set_xlabel('Number of Nodes')
     ax.set_ylabel('Consuming Blocking Time')
-    title = "l2:%f, l3:%f, l4:%f, \np_op_int_node:%.1e, p_mem_int_node:%.1e, p_op_end_node:%.1e, p_mem_end_node:%.1e"%(layer2_target_fidelity_, layer3_target_fidelity_, layer4_target_fidelity_, p_op_int_node_, p_mem_int_node_, p_op_end_node_, p_mem_end_node_)
+    title = "l2:%f, l3:%f, l4:%f, \np_op_int_node:%.1e, p_mem_int_node:%.1e, \np_op_end_node:%.1e, p_mem_end_node:%.1e"%(layer2_target_fidelity_, layer3_target_fidelity_, layer4_target_fidelity_, p_op_int_node_, p_mem_int_node_, p_op_end_node_, p_mem_end_node_)
     ax.set_title(title)
     ax.legend()
     plt.show()

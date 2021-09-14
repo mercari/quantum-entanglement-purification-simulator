@@ -1,9 +1,11 @@
 import math
 
 try:
-    from fidelity import Fidelity, fidelity_to_p, p_to_fidelity
+    from fidelity import FidelityGeneralizedModel as Fidelity
+    from fidelity import fidelity_to_p, p_to_fidelity
 except:
-    from End2EndPurification.fidelity import Fidelity, fidelity_to_p, p_to_fidelity
+    from End2EndPurification.fidelity import FidelityGeneralizedModel as Fidelity
+    from End2EndPurification.fidelity import fidelity_to_p, p_to_fidelity
 
 try:
     from blocking_times import BlockingTimes
@@ -90,6 +92,7 @@ class BellPairProcessor:
         return bt
 
     def process_purification(self):
+        #print("self.fidelity.fidelity", self.fidelity.fidelity)
         if self.fidelity.fidelity <= 0.5 or self.blocking_times.blocking_time_int_node >= BlockingTimes.LIMIT or self.blocking_times.blocking_time_end_node >= BlockingTimes.LIMIT:
             # fidelity less than 0.5 cannot be improved
             return False
