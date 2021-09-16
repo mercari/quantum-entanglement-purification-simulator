@@ -23,7 +23,7 @@ Please read the CLA below carefully before submitting your contribution.
 
 Under any circumstances, by submitting your contribution, you are deemed to accept and agree to be bound by the terms and conditions of the CLA.
 # Licence
-Copyright 2017 Mercari, Inc.
+Copyright 2021 Mercari, Inc.
 
 Licensed under the MIT License.
 
